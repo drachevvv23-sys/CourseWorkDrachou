@@ -1,0 +1,46 @@
+- id: '1779726204098'
+  alias: Владимир на камере
+  description: ''
+  triggers:
+  - trigger: mqtt
+    options:
+      topic: frigate/events
+  conditions:
+  - condition: template
+    value_template: '{{ (trigger.payload | from_json).type == ''end'' }}'
+  - condition: template
+    value_template: '{{ (trigger.payload | from_json).after.sub_label[0] == ''Владимир''
+      }}'
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      entity_id:
+      - notify.hanotify_vladimir_drachev
+      message: Замечен Владимир на камере
+      parse_mode: html
+  mode: single
+- id: '1779735229870'
+  alias: Посторонний на камере
+  description: ''
+  triggers:
+  - trigger: mqtt
+    options:
+      topic: frigate/events
+  conditions:
+  - condition: template
+    value_template: '{{ (trigger.payload | from_json).type == ''end'' }}'
+    alias: Событие завершено
+  - condition: template
+    value_template: '{{ (trigger.payload | from_json).after.label == ''person'' }}'
+    alias: Двигался именно person
+  - condition: template
+    value_template: '{{ (trigger.payload | from_json).after.sub_label == None }}'
+    alias: Person не определён библиотекой
+  actions:
+  - action: telegram_bot.send_message
+    metadata: {}
+    data:
+      message: Обнаружен посторонний
+      parse_mode: html
+  mode: single
